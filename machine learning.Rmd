@@ -1,0 +1,82 @@
+---
+title: "MachineLearning"
+output: html_document
+---
+
+#Assignment
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+## **Set wd and load libraries
+
+```{r}
+setwd("C:/Users/anton/Desktop")
+library('randomForest')
+library('caret')
+library('e1071')
+```
+
+## **Read csv data**
+
+```{r}
+training <- read.csv('pml-training.csv', header=TRUE,na.strings=c('','NA'))
+testing <- read.csv('pml-testing.csv', header=TRUE,na.strings=c('','NA'))
+```
+
+## **Cleaning Data**
+
+After a first analysis appears clear that data needs to be cleaned. All blanck values are converted to N/A so that is easier to clean our data later.
+
+```{r}
+training = training[,!apply(training,2,function(x) any(is.na(x)) )]
+training = training[,-c(1:7)]
+
+testing = testing[,!apply(testing,2,function(x) any(is.na(x)) )]
+testing = testing[,-c(1:7)]
+```
+
+## **Visualize Cleaned Data**
+
+Inserted as comment for better data visualization
+
+```{r}
+#training
+```
+
+## **Splitting the set**
+
+```{r}
+split = createDataPartition(y=training$classe, p=0.6, list=FALSE)
+splitTrain=training[split,]
+splitTest=training[-split, ]
+```
+
+
+## **Creating and Testing the predictive model using randomForest**
+Creating the model with randomForest and using it to predict the Test set
+
+```{r}
+model= randomForest(classe~., data=splitTrain, method='class')
+prediction =predict(model,splitTest, type='class')
+confusion =confusionMatrix(prediction,splitTest$classe)
+```
+
+## ** Checking accuracy**
+
+```{r}
+confusion$table
+```
+
+```{r}
+confusion$overall[1]
+```
+
+
+## **Prediction**
+
+```{r}
+prediction2=predict(model,testing,type='class')
+prediction2
+```
+
+
